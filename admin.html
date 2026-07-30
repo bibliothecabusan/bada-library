@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[운영자] 2026 부산바다도서관 WLIC 연계행사</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;font-size:15px;color:#1a1a1a;background:#f5f5f3;min-height:100vh}
+.wrap{max-width:960px;margin:0 auto;padding:1.5rem 1rem 4rem}
+.login-box{max-width:400px;margin:6rem auto;background:#fff;border-radius:16px;padding:2.5rem;text-align:center;border:1px solid #e8e8e8}
+.login-box h2{font-size:20px;font-weight:600;margin-bottom:8px}
+.login-box p{font-size:13px;color:#888;margin-bottom:2rem}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:#fff;border:1px solid #d9d9d9;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn-google:hover{background:#f5f5f5}
+.btn-google img{width:20px;height:20px}
+.header{margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:flex-start}
+.header h1{font-size:20px;font-weight:600;margin-bottom:4px}
+.header p{font-size:13px;color:#888}
+.admin-badge{background:#fff2f0;color:#a8071a;border:1px solid #ffccc7;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600}
+.user-info{display:flex;align-items:center;gap:10px}
+.user-name{font-size:13px;color:#555}
+.btn-logout{font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid #d9d9d9;background:#fff;cursor:pointer;font-family:inherit}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.metric{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:.75rem 1rem}
+.metric-label{font-size:12px;color:#aaa;margin-bottom:4px}
+.metric-value{font-size:22px;font-weight:600;color:#1a1a1a}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.card-title{font-size:15px;font-weight:600;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+.stitle{font-size:14px;font-weight:600;color:#555;margin:1.25rem 0 .5rem}
+.nlog{background:#f9f9f9;border-radius:8px;padding:.75rem;font-size:13px;max-height:200px;overflow-y:auto;border:1px solid #e8e8e8}
+.nitem{padding:7px 0;border-bottom:1px solid #efefef;display:flex;gap:8px;align-items:flex-start}
+.nitem:last-child{border-bottom:none}
+.nitem-dot{width:8px;height:8px;border-radius:50%;background:#1677ff;margin-top:4px;flex-shrink:0}
+.empty{text-align:center;padding:2rem;color:#bbb;font-size:14px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.75rem;align-items:center}
+.flabel{font-size:13px;color:#555;font-weight:500}
+.fbtn{padding:5px 12px;border-radius:20px;border:1px solid #d9d9d9;background:#fff;color:#555;font-size:13px;cursor:pointer;font-family:inherit}
+.fbtn.on{background:#e6f4ff;border-color:#4096ff;color:#1677ff;font-weight:500}
+.atbl-wrap{overflow-x:auto;border:1px solid #e8e8e8;border-radius:10px}
+.atbl{width:100%;font-size:13px;border-collapse:collapse;min-width:700px}
+.atbl th{text-align:left;padding:9px 12px;background:#fafafa;border-bottom:1px solid #e8e8e8;color:#888;font-weight:500;font-size:12px}
+.atbl td{padding:9px 12px;border-bottom:1px solid #f0f0f0;color:#1a1a1a}
+.atbl tr:last-child td{border-bottom:none}
+.atbl tr:hover td{background:#fafafa}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.tag.접수{background:#f6ffed;color:#237804}
+.tag.대기{background:#fff7e6;color:#873800}
+.btn-danger{font-size:13px;padding:6px 14px;border-radius:8px;border:1px solid #ffccc7;background:transparent;color:#cf1322;cursor:pointer;font-family:inherit}
+.btn-export{font-size:13px;padding:6px 14px;border-radius:8px;border:1px solid #d9d9d9;background:#fff;color:#555;cursor:pointer;font-family:inherit;margin-right:8px}
+.toast{border-radius:8px;padding:11px 16px;font-size:14px;margin-bottom:1rem;display:none}
+.toast.show{display:block}
+.toast.ok{background:#f6ffed;color:#237804;border:1px solid #b7eb8f}
+.toast.err{background:#fff2f0;color:#a8071a;border:1px solid #ffccc7}
+.sync-bar{font-size:12px;color:#aaa;text-align:right;margin-bottom:8px}
+.slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.slot-card{background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:10px 12px;font-size:13px}
+.slot-card.full{border-color:#ffccc7;background:#fff2f0}
+.slot-card.soon{border-color:#ffd591;background:#fff7e6}
+.slot-name{font-weight:600;margin-bottom:2px}
+.slot-sub{color:#888;font-size:12px}
+.slot-count{font-size:18px;font-weight:600;margin-top:6px}
+.slot-count.full{color:#f5222d}
+.slot-count.soon{color:#fa8c16}
+.slot-count.ok{color:#237804}
+</style>
+</head>
+<body>
+
+<!-- 로그인 화면 -->
+<div id="login-screen" class="login-box">
+  <h2>🔒 운영자 로그인</h2>
+  <p>부산바다도서관 운영팀 전용 페이지입니다.<br>Google 계정으로 로그인해 주세요.</p>
+  <button class="btn-google" onclick="loginWithGoogle()">
+    <img src="https://www.google.com/favicon.ico" alt="Google">
+    Google 계정으로 로그인
+  </button>
+</div>
+
+<!-- 관리자 화면 (로그인 후 표시) -->
+<div id="admin-screen" class="wrap" style="display:none">
+  <div class="toast" id="toast"></div>
+  <div class="header">
+    <div>
+      <h1>운영자 관리 페이지</h1>
+      <p>2026 부산바다도서관 WLIC 연계행사 — 들락날락 영어랑 놀자</p>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <span class="admin-badge">🔒 운영자 전용</span>
+      <div class="user-info">
+        <span class="user-name" id="user-name"></span>
+        <button class="btn-logout" onclick="logout()">로그아웃</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sync-bar" id="sync-bar">⏳ 데이터 불러오는 중...</div>
+
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">전체 신청</div><div class="metric-value" id="a-total">-</div></div>
+    <div class="metric"><div class="metric-label">접수</div><div class="metric-value" id="a-acc">-</div></div>
+    <div class="metric"><div class="metric-label">대기</div><div class="metric-value" id="a-wait">-</div></div>
+    <div class="metric"><div class="metric-label">마감 회차</div><div class="metric-value" id="a-closed">-</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>📋 신청 내역 전체</span>
+      <div>
+        <button class="btn-export" onclick="exportCSV()">CSV 다운로드</button>
+        <button class="btn-danger" onclick="confirmReset()">전체 초기화</button>
+      </div>
+    </div>
+    <div class="filters">
+      <span class="flabel">상태</span>
+      <button class="fbtn on" onclick="filtTable('all',this)">전체</button>
+      <button class="fbtn" onclick="filtTable('접수',this)">접수</button>
+      <button class="fbtn" onclick="filtTable('대기',this)">대기</button>
+    </div>
+    <div class="atbl-wrap">
+      <table class="atbl">
+        <thead>
+          <tr><th>#</th><th>아동 이름</th><th>생년월일</th><th>보호자 연락처</th><th>날짜</th><th>프로그램</th><th>회차</th><th>접수 상태</th><th>제출 시간</th></tr>
+        </thead>
+        <tbody id="atbody"><tr><td colspan="9" style="text-align:center;padding:2rem;color:#bbb">데이터 불러오는 중...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>📊 회차별 신청 현황</span>
+    </div>
+    <div class="filters">
+      <span class="flabel">날짜</span>
+      <button class="fbtn on" onclick="filtSlot('all',this)">전체</button>
+      <button class="fbtn" onclick="filtSlot('8월 11일(화)',this)">8/11(화)</button>
+      <button class="fbtn" onclick="filtSlot('8월 12일(수)',this)">8/12(수)</button>
+      <button class="fbtn" onclick="filtSlot('8월 13일(목)',this)">8/13(목)</button>
+    </div>
+    <div class="slot-grid" id="slot-grid"><div class="empty">불러오는 중...</div></div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, onSnapshot, getDocs, deleteDoc, doc, writeBatch, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+// =============================================
+// ✅ 여기에 Firebase 설정값 붙여넣기 (index.html과 동일)
+// =============================================
+const firebaseConfig = {
+  apiKey: "여기에_apiKey",
+  authDomain: "여기에_authDomain",
+  projectId: "여기에_projectId",
+  storageBucket: "여기에_storageBucket",
+  messagingSenderId: "여기에_messagingSenderId",
+  appId: "여기에_appId"
+};
+// =============================================
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+const DATES=['8월 11일(화)','8월 12일(수)','8월 13일(목)'];
+const PROGS=['Ocean Maracas','My Beach Bag','Ocean Breeze Fan','Ding a Ring Guitar'];
+const TIMES=['16시','17시','18시','19시','20시'];
+const CAP=4;
+
+let allApps=[];
+let allSlots={};
+let filtStatus='all';
+let filtDate='all';
+
+function slotKey(d,p,t){return `${d}__${p}__${t}`;}
+function slotSt(c){return c>=CAP?'마감':c===CAP-1?'마감 임박':'신청 가능';}
+
+// 구글 로그인
+window.loginWithGoogle=async function(){
+  try{
+    await signInWithPopup(auth,provider);
+  }catch(e){
+    alert('로그인 실패: '+e.message);
+  }
+}
+
+// 로그아웃
+window.logout=async function(){
+  await signOut(auth);
+}
+
+// 인증 상태 감지
+onAuthStateChanged(auth,(user)=>{
+  if(user){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('admin-screen').style.display='block';
+    document.getElementById('user-name').textContent=user.displayName||user.email;
+    subscribeData();
+  }else{
+    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('admin-screen').style.display='none';
+  }
+});
+
+// 실시간 데이터 구독
+function subscribeData(){
+  // 신청 내역
+  onSnapshot(collection(db,'applications'),(snap)=>{
+    allApps=[];
+    snap.forEach(d=>{
+      const data=d.data();
+      allApps.push({
+        id:d.id,
+        name:data.name||'',
+        birth:data.birth||'',
+        phone:data.phone||'',
+        date:data.date||'',
+        prog:data.prog||'',
+        time:data.time||'',
+        status:data.status||'접수',
+        at:data.submittedAt?.toDate?.()?new Date(data.submittedAt.toDate()).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'',
+      });
+    });
+    allApps.sort((a,b)=>a.at>b.at?1:-1);
+    renderTable();
+    renderMetrics();
+    const now=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('sync-bar').textContent='🔄 마지막 동기화: '+now;
+  });
+
+  // 슬롯 현황
+  onSnapshot(collection(db,'slots'),(snap)=>{
+    allSlots={};
+    snap.forEach(d=>{allSlots[d.id]=d.data();});
+    renderSlots();
+    renderMetrics();
+  });
+}
+
+function renderMetrics(){
+  let closed=0;
+  Object.keys(allSlots).forEach(k=>{if((allSlots[k].count||0)>=CAP)closed++;});
+  document.getElementById('a-total').textContent=allApps.length;
+  document.getElementById('a-acc').textContent=allApps.filter(x=>x.status==='접수').length;
+  document.getElementById('a-wait').textContent=allApps.filter(x=>x.status==='대기').length;
+  document.getElementById('a-closed').textContent=closed;
+}
+
+function renderTable(){
+  const tbody=document.getElementById('atbody');
+  const filtered=allApps.filter(a=>filtStatus==='all'||a.status===filtStatus);
+  if(!filtered.length){
+    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:2rem;color:#bbb">신청 내역이 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML=filtered.map((a,i)=>`<tr>
+    <td style="color:#bbb">${i+1}</td>
+    <td style="font-weight:600">${a.name}</td>
+    <td>${a.birth}</td>
+    <td>${a.phone}</td>
+    <td>${a.date}</td>
+    <td>${a.prog}</td>
+    <td>${a.time}</td>
+    <td><span class="tag ${a.status}">${a.status}</span></td>
+    <td style="color:#bbb;font-size:12px">${a.at}</td>
+  </tr>`).join('');
+}
+
+function renderSlots(){
+  const grid=document.getElementById('slot-grid');
+  const cards=[];
+  DATES.forEach(d=>{
+    if(filtDate!=='all'&&filtDate!==d)return;
+    PROGS.forEach(p=>{
+      TIMES.forEach(t=>{
+        const k=slotKey(d,p,t);
+        const s=allSlots[k]||{count:0};
+        const st=slotSt(s.count);
+        const cls=st==='마감'?'full':st==='마감 임박'?'soon':'';
+        const cc=st==='마감'?'full':st==='마감 임박'?'soon':'ok';
+        cards.push(`<div class="slot-card ${cls}">
+          <div class="slot-name">${t}</div>
+          <div class="slot-sub">${d}</div>
+          <div class="slot-sub">${p}</div>
+          <div class="slot-count ${cc}">${s.count} / ${CAP}명</div>
+        </div>`);
+      });
+    });
+  });
+  grid.innerHTML=cards.length?cards.join(''):'<div class="empty">데이터 없음</div>';
+}
+
+window.filtTable=function(val,btn){
+  filtStatus=val;
+  btn.parentElement.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderTable();
+}
+
+window.filtSlot=function(val,btn){
+  filtDate=val;
+  btn.parentElement.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderSlots();
+}
+
+window.exportCSV=function(){
+  if(!allApps.length){showToast('다운로드할 데이터가 없습니다.','ok');return;}
+  const header='#,아동이름,생년월일,보호자연락처,날짜,프로그램,회차,접수상태,제출시간';
+  const rows=allApps.map((a,i)=>[i+1,a.name,a.birth,a.phone,a.date,a.prog,a.time,a.status,a.at].join(','));
+  const csv='\uFEFF'+header+'\n'+rows.join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='바다도서관_신청내역.csv';a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV 다운로드 완료','ok');
+}
+
+window.confirmReset=async function(){
+  if(!confirm('⚠️ 전체 데이터를 초기화하시겠습니까?\n신청 내역이 모두 삭제되고 슬롯이 0으로 초기화됩니다.\n이 작업은 되돌릴 수 없습니다.'))return;
+  if(!confirm('정말로 초기화하시겠습니까?'))return;
+  try{
+    const batch=writeBatch(db);
+    const appSnap=await getDocs(collection(db,'applications'));
+    appSnap.forEach(d=>batch.delete(d.ref));
+    const slotSnap=await getDocs(collection(db,'slots'));
+    slotSnap.forEach(d=>batch.update(d.ref,{count:0,notified:false}));
+    await batch.commit();
+    showToast('초기화 완료','ok');
+  }catch(e){
+    showToast('초기화 실패: '+e.message,'err');
+  }
+}
+
+function showToast(msg,type){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast show '+type;
+  setTimeout(()=>{el.className='toast';},3000);
+}
+</script>
+</body>
+</html>
