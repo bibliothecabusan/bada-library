@@ -196,7 +196,7 @@ const DATES=['8월 11일(화)','8월 12일(수)','8월 13일(목)'];
 const PROGS=['Ocean Maracas','My Beach Bag','Ocean Breeze Fan','Ding a Ring Guitar'];
 const TIMES=['16시','17시','18시','19시','20시'];
 const CAP=4;
-let slots={};
+let counts={};
 let filts={date:'all',status:'all'};
 
 function slotKey(d,p,t){return `${d}__${p}__${t}`;}
@@ -210,27 +210,19 @@ function initBirth(){
   for(let d=1;d<=31;d++){const o=document.createElement('option');o.value=String(d).padStart(2,'0');o.textContent=d+'일';bd.appendChild(o);}
 }
 
-// 슬롯 60개 초기 생성 (최초 1회)
-async function initSlotsIfNeeded(){
-  for(const d of DATES){
-    for(const p of PROGS){
-      for(const t of TIMES){
-        const k=slotKey(d,p,t);
-        const ref=doc(db,'slots',k);
-        const snap=await getDoc(ref);
-        if(!snap.exists()){
-          await setDoc(ref,{date:d,prog:p,time:t,count:0,capacity:CAP,notified:false});
-        }
-      }
-    }
-  }
-}
-
-// 신청 현황 실시간 구독
+// ✅ applications 실시간 구독 → 유효 신청자만 집계 (취소 제외)
 function subscribeSlots(){
-  onSnapshot(collection(db,'slots'),(snapshot)=>{
-    slots={};
-    snapshot.forEach(d=>{slots[d.id]=d.data();});
+  onSnapshot(collection(db,'applications'),(snapshot)=>{
+    counts={};
+    DATES.forEach(d=>PROGS.forEach(p=>TIMES.forEach(t=>{
+      counts[slotKey(d,p,t)]=0;
+    })));
+    snapshot.forEach(doc=>{
+      const data=doc.data();
+      if(data.status==='취소') return;
+      const k=slotKey(data.date,data.prog,data.time);
+      if(counts[k]!==undefined) counts[k]++;
+    });
     renderStatus();
     updateTimeSlots();
     const now=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -244,14 +236,14 @@ function renderStatus(){
   const rows=[];
   DATES.forEach(d=>PROGS.forEach(p=>TIMES.forEach(t=>{
     const k=slotKey(d,p,t);
-    const s=slots[k]||{count:0,capacity:CAP};
-    const st=slotSt(s.count);
-    tot+=s.count;
-    if(st==='마감')closed++;else rem+=(CAP-s.count);
+    const cnt=counts[k]||0;
+    const st=slotSt(cnt);
+    tot+=cnt;
+    if(st==='마감')closed++;else rem+=(CAP-cnt);
     const dOk=filts.date==='all'||filts.date===d;
     const sOk=filts.status==='all'||filts.status===st;
     if(!dOk||!sOk)return;
-    const rv=Math.max(0,CAP-s.count);
+    const rv=Math.max(0,CAP-cnt);
     const bc=st==='마감'?'full':st==='마감 임박'?'soon':'open';
     const rc=rv===0?'#f5222d':rv===1?'#fa8c16':'#237804';
     const dots=Array.from({length:CAP},(_,i)=>{
@@ -262,7 +254,7 @@ function renderStatus(){
     rows.push(`<div class="srow">
       <span style="font-weight:500;font-size:13px">${d}<br><span style="color:#888;font-weight:400;font-size:12px">${p}</span></span>
       <span style="color:#888">${t}</span>
-      <span><div class="dots">${dots}</div><div style="font-size:11px;color:#bbb;margin-top:3px">${s.count}/${CAP}명</div></span>
+      <span><div class="dots">${dots}</div><div style="font-size:11px;color:#bbb;margin-top:3px">${cnt}/${CAP}명</div></span>
       <span style="font-weight:600;color:${rc}">${rv}명</span>
       <span><span class="badge ${bc}">${st}</span></span>
     </div>`);
@@ -281,9 +273,9 @@ function updateTimeSlots(){
   let opts='<option value="">— 희망 회차를 선택해 주세요 —</option>';
   TIMES.forEach(t=>{
     const k=slotKey(date,prog,t);
-    const s=slots[k]||{count:0};
-    const st=slotSt(s.count);
-    const rv=Math.max(0,CAP-s.count);
+    const cnt=counts[k]||0;
+    const st=slotSt(cnt);
+    const rv=Math.max(0,CAP-cnt);
     opts+=`<option value="${t}"${cur===t?' selected':''}>${t}${st==='마감'?' [마감]':rv===1?' [잔여 1명]':''}</option>`;
   });
   document.getElementById('f-time').innerHTML=opts;
@@ -298,9 +290,9 @@ window.onSession=function(){
   let opts='<option value="">— 희망 회차를 선택해 주세요 —</option>';
   TIMES.forEach(t=>{
     const k=slotKey(date,prog,t);
-    const s=slots[k]||{count:0};
-    const st=slotSt(s.count);
-    const rv=Math.max(0,CAP-s.count);
+    const cnt=counts[k]||0;
+    const st=slotSt(cnt);
+    const rv=Math.max(0,CAP-cnt);
     opts+=`<option value="${t}">${t}${st==='마감'?' [마감]':rv===1?' [잔여 1명]':''}</option>`;
   });
   tsel.innerHTML=opts;
@@ -355,9 +347,8 @@ window.submit=async function(){
       return;
     }
 
-    // ✅ 슬롯 현재 카운트 실시간 조회 후 접수/대기 판정
-    const slotSnap=await getDoc(doc(db,'slots',k));
-    const currentCount=slotSnap.exists()?slotSnap.data().count:0;
+    // ✅ 유효 신청자 수 기준 접수/대기 판정
+    const currentCount=counts[k]||0;
     const status=currentCount<CAP?'접수':'대기';
 
     btn.textContent='신청 중...';
@@ -367,7 +358,6 @@ window.submit=async function(){
       note:document.getElementById('f-note').value.trim(),
       submittedAt:serverTimestamp()
     });
-    await updateDoc(doc(db,'slots',k),{count:increment(1)});
 
     document.getElementById('f-name').value='';
     document.getElementById('f-by').value='';
@@ -411,7 +401,7 @@ window.goTab=function(name,btn){
 }
 
 initBirth();
-initSlotsIfNeeded().then(()=>subscribeSlots());
+subscribeSlots();
 </script>
 </body>
 </html>
