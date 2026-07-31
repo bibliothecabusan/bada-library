@@ -43,7 +43,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .tag.취소{background:#f5f5f5;color:#999}
 .btn-cancel{font-size:11px;padding:3px 8px;border-radius:4px;border:1px solid #ffccc7;background:#fff;color:#cf1322;cursor:pointer;font-family:inherit}
 .btn-cancel:hover{background:#fff2f0}
-.btn-cancel:disabled{opacity:0.4;cursor:not-allowed}
 .btn-danger{font-size:13px;padding:6px 14px;border-radius:8px;border:1px solid #ffccc7;background:transparent;color:#cf1322;cursor:pointer;font-family:inherit}
 .btn-export{font-size:13px;padding:6px 14px;border-radius:8px;border:1px solid #d9d9d9;background:#fff;color:#555;cursor:pointer;font-family:inherit;margin-right:8px}
 .toast{border-radius:8px;padding:11px 16px;font-size:14px;margin-bottom:1rem;display:none}
@@ -63,8 +62,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .slot-count.soon{color:#fa8c16}
 .slot-count.ok{color:#237804}
 .slot-hint{font-size:11px;color:#aaa;margin-top:4px}
-
-/* 모달 */
 .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:#fff;border-radius:12px;padding:1.5rem;width:90%;max-width:640px;max-height:80vh;overflow-y:auto}
@@ -80,7 +77,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 </head>
 <body>
 
-<!-- 로그인 -->
 <div id="login-screen" class="login-box">
   <h2>🔒 운영자 로그인</h2>
   <p>부산바다도서관 운영팀 전용 페이지입니다.<br>Google 계정으로 로그인해 주세요.</p>
@@ -90,7 +86,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
   </button>
 </div>
 
-<!-- 관리자 화면 -->
 <div id="admin-screen" class="wrap" style="display:none">
   <div class="toast" id="toast"></div>
   <div class="header">
@@ -106,9 +101,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
       </div>
     </div>
   </div>
-
   <div class="sync-bar" id="sync-bar">⏳ 데이터 불러오는 중...</div>
-
   <div class="metrics">
     <div class="metric"><div class="metric-label">전체 신청</div><div class="metric-value" id="a-total">-</div></div>
     <div class="metric"><div class="metric-label">접수</div><div class="metric-value" id="a-acc">-</div></div>
@@ -116,7 +109,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
     <div class="metric"><div class="metric-label">취소</div><div class="metric-value" id="a-cancel">-</div></div>
   </div>
 
-  <!-- 신청 내역 -->
   <div class="card">
     <div class="card-title">
       <span>📋 신청 내역 전체</span>
@@ -135,19 +127,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
     <div class="atbl-wrap">
       <table class="atbl">
         <thead>
-          <tr>
-            <th>#</th><th>아동 이름</th><th>생년월일</th><th>보호자 연락처</th>
-            <th>날짜</th><th>프로그램</th><th>회차</th><th>접수 상태</th><th>제출 시간</th><th>관리</th>
-          </tr>
+          <tr><th>#</th><th>아동 이름</th><th>생년월일</th><th>보호자 연락처</th><th>날짜</th><th>프로그램</th><th>회차</th><th>접수 상태</th><th>제출 시간</th><th>관리</th></tr>
         </thead>
-        <tbody id="atbody">
-          <tr><td colspan="10" style="text-align:center;padding:2rem;color:#bbb">데이터 불러오는 중...</td></tr>
-        </tbody>
+        <tbody id="atbody"><tr><td colspan="10" style="text-align:center;padding:2rem;color:#bbb">데이터 불러오는 중...</td></tr></tbody>
       </table>
     </div>
   </div>
 
-  <!-- 회차별 현황 -->
   <div class="card">
     <div class="card-title"><span>📊 회차별 신청 현황 <span style="font-size:12px;font-weight:400;color:#888">— 카드 클릭 시 신청자 확인</span></span></div>
     <div class="filters">
@@ -161,16 +147,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
   </div>
 </div>
 
-<!-- 신청자 상세 모달 -->
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
   <div class="modal">
     <button class="modal-close" onclick="document.getElementById('modal').classList.remove('show')">✕</button>
     <div class="modal-title" id="modal-title"></div>
     <div class="modal-sub" id="modal-sub"></div>
     <table class="modal-tbl">
-      <thead>
-        <tr><th>#</th><th>아동 이름</th><th>생년월일</th><th>연락처</th><th>접수 상태</th><th>제출 시간</th></tr>
-      </thead>
+      <thead><tr><th>#</th><th>아동 이름</th><th>생년월일</th><th>연락처</th><th>접수 상태</th><th>제출 시간</th></tr></thead>
       <tbody id="modal-tbody"></tbody>
     </table>
   </div>
@@ -181,7 +164,6 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getFirestore, collection, doc, onSnapshot, updateDoc, getDocs, writeBatch } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-// ✅ Firebase 설정값
 const firebaseConfig = {
   apiKey: "AIzaSyCJwtXqltcejM9jA07IzEjhq9qSXGBr0g0",
   authDomain: "bada-library.firebaseapp.com",
@@ -202,18 +184,17 @@ const TIMES=['16시','17시','18시','19시','20시'];
 const CAP=4;
 
 let allApps=[];
-let allSlots={};
+let counts={};  // 취소 제외 유효 신청자 수
 let filtStatus='all';
 let filtDate='all';
 
-function slotKey(d,p,t){return `${d}__${p}__${t}`;}
+function slotKey(d,p,t){return d+'__'+p+'__'+t;}
 function slotSt(c){return c>=CAP?'마감':c===CAP-1?'마감 임박':'신청 가능';}
 
 window.loginWithGoogle=async function(){
   try{ await signInWithPopup(auth,provider); }
   catch(e){ alert('로그인 실패: '+e.message); }
 }
-
 window.logout=async function(){ await signOut(auth); }
 
 onAuthStateChanged(auth,(user)=>{
@@ -231,38 +212,34 @@ onAuthStateChanged(auth,(user)=>{
 function subscribeData(){
   onSnapshot(collection(db,'applications'),(snap)=>{
     allApps=[];
+    // 슬롯 카운트 초기화
+    counts={};
+    DATES.forEach(d=>PROGS.forEach(p=>TIMES.forEach(t=>{counts[slotKey(d,p,t)]=0;})));
+
     snap.forEach(d=>{
       const data=d.data();
-      allApps.push({
-        id:d.id,
-        name:data.name||'',
-        birth:data.birth||'',
-        phone:data.phone||'',
-        date:data.date||'',
-        prog:data.prog||'',
-        time:data.time||'',
-        status:data.status||'접수',
-        at:data.submittedAt?.toDate?.()?new Date(data.submittedAt.toDate()).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'',
-      });
+      const at=data.submittedAt?.toDate?.()?new Date(data.submittedAt.toDate()).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+      allApps.push({id:d.id,name:data.name||'',birth:data.birth||'',phone:data.phone||'',date:data.date||'',prog:data.prog||'',time:data.time||'',status:data.status||'접수',at});
+      // 취소 제외 카운트
+      if(data.status!=='취소'){
+        const k=slotKey(data.date,data.prog,data.time);
+        if(k in counts) counts[k]++;
+      }
     });
     allApps.sort((a,b)=>a.at>b.at?1:-1);
-    renderTable();
-    renderMetrics();
+    renderAll();
     const now=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     document.getElementById('sync-bar').textContent='🔄 마지막 동기화: '+now;
   });
+}
 
-  onSnapshot(collection(db,'slots'),(snap)=>{
-    allSlots={};
-    snap.forEach(d=>{allSlots[d.id]=d.data();});
-    renderSlots();
-    renderMetrics();
-  });
+function renderAll(){
+  renderMetrics();
+  renderTable();
+  renderSlots();
 }
 
 function renderMetrics(){
-  let closed=0;
-  Object.keys(allSlots).forEach(k=>{if((allSlots[k].count||0)>=CAP)closed++;});
   document.getElementById('a-total').textContent=allApps.length;
   document.getElementById('a-acc').textContent=allApps.filter(x=>x.status==='접수').length;
   document.getElementById('a-wait').textContent=allApps.filter(x=>x.status==='대기').length;
@@ -272,33 +249,28 @@ function renderMetrics(){
 function renderTable(){
   const tbody=document.getElementById('atbody');
   const filtered=allApps.filter(a=>filtStatus==='all'||a.status===filtStatus);
-  if(!filtered.length){
-    tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:2rem;color:#bbb">신청 내역이 없습니다.</td></tr>';
-    return;
-  }
-  tbody.innerHTML=filtered.map((a,i)=>`<tr class="${a.status==='취소'?'cancelled':''}">
-    <td style="color:#bbb">${i+1}</td>
-    <td style="font-weight:600">${a.name}</td>
-    <td>${a.birth}</td>
-    <td>${a.phone}</td>
-    <td>${a.date}</td>
-    <td>${a.prog}</td>
-    <td>${a.time}</td>
-    <td><span class="tag ${a.status}">${a.status}</span></td>
-    <td style="color:#bbb;font-size:12px">${a.at}</td>
-    <td>${a.status!=='취소'
-      ?`<button class="btn-cancel" onclick="cancelApp('${a.id}','${a.date}','${a.prog}','${a.time}','${a.status}')">취소</button>`
-      :'<span style="color:#bbb;font-size:12px">취소됨</span>'
-    }</td>
-  </tr>`).join('');
+  if(!filtered.length){tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:2rem;color:#bbb">신청 내역이 없습니다.</td></tr>';return;}
+  tbody.innerHTML=filtered.map((a,i)=>'<tr class="'+(a.status==='취소'?'cancelled':'')+'">'
+    +'<td style="color:#bbb">'+(i+1)+'</td>'
+    +'<td style="font-weight:600">'+a.name+'</td>'
+    +'<td>'+a.birth+'</td>'
+    +'<td>'+a.phone+'</td>'
+    +'<td>'+a.date+'</td>'
+    +'<td>'+a.prog+'</td>'
+    +'<td>'+a.time+'</td>'
+    +'<td><span class="tag '+a.status+'">'+a.status+'</span></td>'
+    +'<td style="color:#bbb;font-size:12px">'+a.at+'</td>'
+    +'<td>'+(a.status!=='취소'
+      ?'<button class="btn-cancel" onclick="cancelApp(\''+a.id+'\')">취소</button>'
+      :'<span style="color:#bbb;font-size:12px">취소됨</span>')
+    +'</td></tr>').join('');
 }
 
-// 취소 처리
-window.cancelApp=async function(id,date,prog,time,status){
-  if(!confirm(`이 신청을 취소 처리하시겠습니까?\n취소 시 신청 현황에 자동 반영됩니다.`))return;
+// ✅ 취소 처리 - 상태만 변경, 슬롯 카운트는 자동 집계로 반영
+window.cancelApp=async function(id){
+  if(!confirm('이 신청을 취소 처리하시겠습니까?\n취소 시 신청 현황에 자동 반영됩니다.'))return;
   try{
     await updateDoc(doc(db,'applications',id),{status:'취소'});
-    // 슬롯 카운트는 applications 실시간 집계로 자동 반영
     showToast('취소 처리 완료','ok');
   }catch(e){
     showToast('오류: '+e.message,'err');
@@ -313,47 +285,42 @@ function renderSlots(){
     PROGS.forEach(p=>{
       TIMES.forEach(t=>{
         const k=slotKey(d,p,t);
-        const s=allSlots[k]||{count:0};
-        const st=slotSt(s.count);
+        const cnt=counts[k]||0;
+        const st=slotSt(cnt);
         const cls=st==='마감'?'full':st==='마감 임박'?'soon':'';
         const cc=st==='마감'?'full':st==='마감 임박'?'soon':'ok';
-        cards.push(`<div class="slot-card ${cls}" onclick="openSlotModal('${d}','${p}','${t}')">
-          <div class="slot-name">${t}</div>
-          <div class="slot-sub">${d}</div>
-          <div class="slot-sub">${p}</div>
-          <div class="slot-count ${cc}">${s.count} / ${CAP}명</div>
-          <div class="slot-hint">클릭하여 신청자 확인</div>
-        </div>`);
+        cards.push('<div class="slot-card '+cls+'" onclick="openSlotModal(\''+d+'\',\''+p+'\',\''+t+'\')">'
+          +'<div class="slot-name">'+t+'</div>'
+          +'<div class="slot-sub">'+d+'</div>'
+          +'<div class="slot-sub">'+p+'</div>'
+          +'<div class="slot-count '+cc+'">'+cnt+' / '+CAP+'명</div>'
+          +'<div class="slot-hint">클릭하여 신청자 확인</div>'
+          +'</div>');
       });
     });
   });
   grid.innerHTML=cards.length?cards.join(''):'<div class="empty">데이터 없음</div>';
 }
 
-// 회차별 신청자 모달
 window.openSlotModal=function(date,prog,time){
   const slotApps=allApps.filter(a=>a.date===date&&a.prog===prog&&a.time===time&&a.status!=='취소');
-  document.getElementById('modal-title').textContent=`${date} / ${prog} / ${time}`;
-  document.getElementById('modal-sub').textContent=`신청자 ${slotApps.length}명 / 정원 ${CAP}명`;
+  document.getElementById('modal-title').textContent=date+' / '+prog+' / '+time;
+  document.getElementById('modal-sub').textContent='신청자 '+slotApps.length+'명 / 정원 '+CAP+'명';
   const tbody=document.getElementById('modal-tbody');
-  if(!slotApps.length){
-    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:#bbb">신청자가 없습니다.</td></tr>';
-  }else{
-    tbody.innerHTML=slotApps.map((a,i)=>`<tr>
-      <td style="color:#bbb">${i+1}</td>
-      <td style="font-weight:600">${a.name}</td>
-      <td>${a.birth}</td>
-      <td>${a.phone}</td>
-      <td><span class="tag ${a.status}">${a.status}</span></td>
-      <td style="color:#bbb;font-size:12px">${a.at}</td>
-    </tr>`).join('');
-  }
+  tbody.innerHTML=slotApps.length
+    ?slotApps.map((a,i)=>'<tr>'
+        +'<td style="color:#bbb">'+(i+1)+'</td>'
+        +'<td style="font-weight:600">'+a.name+'</td>'
+        +'<td>'+a.birth+'</td>'
+        +'<td>'+a.phone+'</td>'
+        +'<td><span class="tag '+a.status+'">'+a.status+'</span></td>'
+        +'<td style="color:#bbb;font-size:12px">'+a.at+'</td>'
+        +'</tr>').join('')
+    :'<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:#bbb">신청자가 없습니다.</td></tr>';
   document.getElementById('modal').classList.add('show');
 }
 
-window.closeModal=function(e){
-  if(e.target.id==='modal') document.getElementById('modal').classList.remove('show');
-}
+window.closeModal=function(e){if(e.target.id==='modal')document.getElementById('modal').classList.remove('show');}
 
 window.filtTable=function(val,btn){
   filtStatus=val;
@@ -383,14 +350,12 @@ window.exportCSV=function(){
 }
 
 window.confirmReset=async function(){
-  if(!confirm('⚠️ 전체 데이터를 초기화하시겠습니까?\n신청 내역이 모두 삭제되고 슬롯이 0으로 초기화됩니다.\n이 작업은 되돌릴 수 없습니다.'))return;
+  if(!confirm('⚠️ 전체 데이터를 초기화하시겠습니까?\n모든 신청 내역이 삭제됩니다.\n이 작업은 되돌릴 수 없습니다.'))return;
   if(!confirm('정말로 초기화하시겠습니까?'))return;
   try{
     const batch=writeBatch(db);
     const appSnap=await getDocs(collection(db,'applications'));
     appSnap.forEach(d=>batch.delete(d.ref));
-    const slotSnap=await getDocs(collection(db,'slots'));
-    slotSnap.forEach(d=>batch.update(d.ref,{count:0,notified:false}));
     await batch.commit();
     showToast('초기화 완료','ok');
   }catch(e){
