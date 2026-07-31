@@ -188,7 +188,8 @@ authDomain: "bada-library.firebaseapp.com",
 projectId: "bada-library",
 storageBucket: "bada-library.firebasestorage.app",
 messagingSenderId: "615532147657",
-appId: "1:615532147657:web:e4e5458a9171a312adee18"};
+appId: "1:615532147657:web:e4e5458a9171a312adee18"
+};
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -294,7 +295,7 @@ function renderTable(){
 
 // 취소 처리
 window.cancelApp=async function(id,date,prog,time,status){
-  if(!confirm(`이 신청을 취소 처리하시겠습니까?\n취소 후 슬롯 잔여 인원이 1 증가합니다.`))return;
+  if(!confirm(`이 신청을 취소 처리하시겠습니까?\n취소 시 신청 현황에 자동 반영됩니다.`))return;
   try{
     await updateDoc(doc(db,'applications',id),{status:'취소'});
     // 슬롯 카운트는 applications 실시간 집계로 자동 반영
