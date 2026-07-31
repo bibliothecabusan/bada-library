@@ -19,7 +19,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .notice{background:#fffbe6;border:1px solid #ffe58f;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:13px;color:#7a5c00;line-height:1.8}
 .notice strong{font-weight:600}
 .card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem}
-.card-title{font-size:15px;font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:8px;color:#1a1a1a}
+.card-title{font-size:15px;font-weight:600;margin-bottom:1rem;color:#1a1a1a}
 .field{margin-bottom:1rem}
 .field label{display:block;font-size:13px;font-weight:500;color:#555;margin-bottom:6px}
 .field input,.field select{width:100%;border:1px solid #d9d9d9;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;background:#fff;color:#1a1a1a;outline:none;transition:border-color .15s}
@@ -29,14 +29,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .agree-box{display:flex;align-items:flex-start;gap:10px;background:#f9f9f9;padding:12px;border-radius:8px;margin-bottom:1rem}
 .agree-box input[type=checkbox]{width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:#4096ff}
 .agree-box label{font-size:13px;color:#666;cursor:pointer;line-height:1.6}
-.btn-submit{width:100%;padding:13px;background:#1677ff;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn-submit{width:100%;padding:13px;background:#1677ff;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
 .btn-submit:hover{background:#0958d9}
 .btn-submit:disabled{background:#ccc;cursor:not-allowed}
 .toast{border-radius:8px;padding:11px 16px;font-size:14px;margin-bottom:1rem;display:none;line-height:1.5}
 .toast.show{display:block}
 .toast.ok{background:#f6ffed;color:#237804;border:1px solid #b7eb8f}
 .toast.err{background:#fff2f0;color:#a8071a;border:1px solid #ffccc7}
-.toast.info{background:#e6f4ff;color:#003eb3;border:1px solid #91caff}
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem}
 .metric{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:.75rem 1rem}
 .metric-label{font-size:12px;color:#aaa;margin-bottom:4px}
@@ -55,7 +54,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .badge.soon{background:#fff7e6;color:#873800;border:1px solid #ffd591}
 .badge.full{background:#fff2f0;color:#a8071a;border:1px solid #ffccc7}
 .empty{text-align:center;padding:2rem;color:#bbb;font-size:14px}
-.loading{text-align:center;padding:2rem;color:#888;font-size:14px}
 .sync-bar{font-size:12px;color:#aaa;text-align:right;margin-bottom:6px;min-height:16px}
 </style>
 </head>
@@ -141,7 +139,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
         <label for="f-agree">사진·영상 촬영 및 활용, 개인정보 수집·이용, 안내사항(마감 시 미접수 가능)에 모두 동의합니다.</label>
       </div>
     </div>
-    <button class="btn-submit" id="btn-submit" onclick="submit()">신청하기</button>
+    <button class="btn-submit" id="btn-submit" onclick="doSubmit()">신청하기</button>
   </div>
 
   <!-- 신청 현황 -->
@@ -167,18 +165,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
       <button class="fbtn" onclick="filt('status','마감',this)">마감</button>
     </div>
     <div class="shead"><span>날짜 / 프로그램</span><span>회차</span><span>신청/정원</span><span>잔여</span><span>상태</span></div>
-    <div id="sgrid"><div class="loading">현황을 불러오고 있습니다...</div></div>
+    <div id="sgrid"><div class="empty">현황을 불러오고 있습니다...</div></div>
   </div>
 </div>
 
-<!-- ✅ Firebase SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, increment, serverTimestamp, getDoc, setDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, collection, doc, onSnapshot, addDoc, serverTimestamp, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-// =============================================
-// ✅ 여기에 Firebase 설정값 붙여넣기
-// =============================================
 const firebaseConfig = {
   apiKey: "AIzaSyCJwtXqltcejM9jA07IzEjhq9qSXGBr0g0",
   authDomain: "bada-library.firebaseapp.com",
@@ -187,7 +181,6 @@ const firebaseConfig = {
   messagingSenderId: "615532147657",
   appId: "1:615532147657:web:e4e5458a9171a312adee18"
 };
-// =============================================
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -196,13 +189,15 @@ const DATES=['8월 11일(화)','8월 12일(수)','8월 13일(목)'];
 const PROGS=['Ocean Maracas','My Beach Bag','Ocean Breeze Fan','Ding a Ring Guitar'];
 const TIMES=['16시','17시','18시','19시','20시'];
 const CAP=4;
+
+// 슬롯별 유효 신청자 수 (취소 제외 실시간 집계)
 let counts={};
 let filts={date:'all',status:'all'};
 
-function slotKey(d,p,t){return `${d}__${p}__${t}`;}
+function slotKey(d,p,t){return d+'__'+p+'__'+t;}
 function slotSt(c){return c>=CAP?'마감':c===CAP-1?'마감 임박':'신청 가능';}
 
-// 생년월일 드롭다운 초기화
+// 생년월일 초기화
 function initBirth(){
   const by=document.getElementById('f-by');
   const bd=document.getElementById('f-bd');
@@ -210,21 +205,23 @@ function initBirth(){
   for(let d=1;d<=31;d++){const o=document.createElement('option');o.value=String(d).padStart(2,'0');o.textContent=d+'일';bd.appendChild(o);}
 }
 
-// ✅ applications 실시간 구독 → 유효 신청자만 집계 (취소 제외)
-function subscribeSlots(){
-  onSnapshot(collection(db,'applications'),(snapshot)=>{
+// applications 실시간 구독 → 취소 제외 집계
+function subscribeApps(){
+  onSnapshot(collection(db,'applications'),(snap)=>{
+    // 전체 슬롯 0으로 초기화
     counts={};
     DATES.forEach(d=>PROGS.forEach(p=>TIMES.forEach(t=>{
       counts[slotKey(d,p,t)]=0;
     })));
-    snapshot.forEach(doc=>{
-      const data=doc.data();
+    // 취소 제외한 유효 신청만 카운트
+    snap.forEach(docSnap=>{
+      const data=docSnap.data();
       if(data.status==='취소') return;
       const k=slotKey(data.date,data.prog,data.time);
-      if(counts[k]!==undefined) counts[k]++;
+      if(k in counts) counts[k]++;
     });
     renderStatus();
-    updateTimeSlots();
+    updateTimeOpts();
     const now=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     document.getElementById('sync-bar').textContent='🔄 마지막 동기화: '+now;
   });
@@ -239,25 +236,26 @@ function renderStatus(){
     const cnt=counts[k]||0;
     const st=slotSt(cnt);
     tot+=cnt;
-    if(st==='마감')closed++;else rem+=(CAP-cnt);
+    if(st==='마감') closed++;
+    else rem+=(CAP-cnt);
     const dOk=filts.date==='all'||filts.date===d;
     const sOk=filts.status==='all'||filts.status===st;
-    if(!dOk||!sOk)return;
+    if(!dOk||!sOk) return;
     const rv=Math.max(0,CAP-cnt);
     const bc=st==='마감'?'full':st==='마감 임박'?'soon':'open';
     const rc=rv===0?'#f5222d':rv===1?'#fa8c16':'#237804';
     const dots=Array.from({length:CAP},(_,i)=>{
       let c='dot';
-      if(i<s.count)c+=s.count>=CAP?' x':s.count===CAP-1&&i===s.count-1?' w':' f';
-      return `<div class="${c}"></div>`;
+      if(i<cnt) c+=cnt>=CAP?' x':cnt===CAP-1&&i===cnt-1?' w':' f';
+      return '<div class="'+c+'"></div>';
     }).join('');
-    rows.push(`<div class="srow">
-      <span style="font-weight:500;font-size:13px">${d}<br><span style="color:#888;font-weight:400;font-size:12px">${p}</span></span>
-      <span style="color:#888">${t}</span>
-      <span><div class="dots">${dots}</div><div style="font-size:11px;color:#bbb;margin-top:3px">${cnt}/${CAP}명</div></span>
-      <span style="font-weight:600;color:${rc}">${rv}명</span>
-      <span><span class="badge ${bc}">${st}</span></span>
-    </div>`);
+    rows.push('<div class="srow">'
+      +'<span style="font-weight:500;font-size:13px">'+d+'<br><span style="color:#888;font-weight:400;font-size:12px">'+p+'</span></span>'
+      +'<span style="color:#888">'+t+'</span>'
+      +'<span><div class="dots">'+dots+'</div><div style="font-size:11px;color:#bbb;margin-top:3px">'+cnt+'/'+CAP+'명</div></span>'
+      +'<span style="font-weight:600;color:'+rc+'">'+rv+'명</span>'
+      +'<span><span class="badge '+bc+'">'+st+'</span></span>'
+      +'</div>');
   })));
   grid.innerHTML=rows.length?rows.join(''):'<div class="empty">해당 조건의 회차가 없습니다.</div>';
   document.getElementById('m-applied').textContent=tot;
@@ -265,18 +263,17 @@ function renderStatus(){
   document.getElementById('m-remain').textContent=rem;
 }
 
-function updateTimeSlots(){
+function updateTimeOpts(){
   const sv=document.getElementById('f-session').value;
-  if(!sv)return;
+  if(!sv) return;
   const [date,prog]=sv.split('|');
   const cur=document.getElementById('f-time').value;
   let opts='<option value="">— 희망 회차를 선택해 주세요 —</option>';
   TIMES.forEach(t=>{
-    const k=slotKey(date,prog,t);
-    const cnt=counts[k]||0;
+    const cnt=counts[slotKey(date,prog,t)]||0;
     const st=slotSt(cnt);
     const rv=Math.max(0,CAP-cnt);
-    opts+=`<option value="${t}"${cur===t?' selected':''}>${t}${st==='마감'?' [마감]':rv===1?' [잔여 1명]':''}</option>`;
+    opts+='<option value="'+t+'"'+(cur===t?' selected':'')+'>'+t+(st==='마감'?' [마감]':rv===1?' [잔여 1명]':'')+'</option>';
   });
   document.getElementById('f-time').innerHTML=opts;
 }
@@ -289,17 +286,23 @@ window.onSession=function(){
   const [date,prog]=val.split('|');
   let opts='<option value="">— 희망 회차를 선택해 주세요 —</option>';
   TIMES.forEach(t=>{
-    const k=slotKey(date,prog,t);
-    const cnt=counts[k]||0;
+    const cnt=counts[slotKey(date,prog,t)]||0;
     const st=slotSt(cnt);
     const rv=Math.max(0,CAP-cnt);
-    opts+=`<option value="${t}">${t}${st==='마감'?' [마감]':rv===1?' [잔여 1명]':''}</option>`;
+    opts+='<option value="'+t+'">'+t+(st==='마감'?' [마감]':rv===1?' [잔여 1명]':'')+'</option>';
   });
   tsel.innerHTML=opts;
   hint.textContent='마감 회차 선택 시 대기 처리될 수 있습니다.';
 }
 
-window.submit=async function(){
+function showToast(msg,type){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast show '+type;
+  setTimeout(()=>{el.className='toast';},4000);
+}
+
+window.doSubmit=async function(){
+  // 신청 기간 체크
   const now=new Date();
   const open=new Date('2026-07-31T09:00:00+09:00');
   const close=new Date('2026-08-09T23:59:00+09:00');
@@ -323,16 +326,15 @@ window.submit=async function(){
   if(!agree){showToast('안내사항에 동의해 주세요.','err');return;}
 
   const [date,prog]=sv.split('|');
+  const birth=by+'.'+bm+'.'+bd;
   const k=slotKey(date,prog,time);
-  const birth=`${by}.${bm}.${bd}`;
 
   const btn=document.getElementById('btn-submit');
   btn.disabled=true;btn.textContent='확인 중...';
 
   try{
-    // ✅ 중복 신청 체크 (이름 + 전화번호 + 생년월일 + 날짜 + 프로그램 + 회차)
-    const dupQ=query(
-      collection(db,'applications'),
+    // 중복 신청 체크
+    const dupQ=query(collection(db,'applications'),
       where('name','==',name),
       where('phone','==',phone),
       where('birth','==',birth),
@@ -347,10 +349,9 @@ window.submit=async function(){
       return;
     }
 
-    // ✅ 유효 신청자 수 기준 접수/대기 판정
-    const currentCount=counts[k]||0;
-    const status=currentCount<CAP?'접수':'대기';
-
+    // 접수/대기 판정
+    const cnt=counts[k]||0;
+    const status=cnt<CAP?'접수':'대기';
     btn.textContent='신청 중...';
 
     await addDoc(collection(db,'applications'),{
@@ -359,6 +360,7 @@ window.submit=async function(){
       submittedAt:serverTimestamp()
     });
 
+    // 폼 초기화
     document.getElementById('f-name').value='';
     document.getElementById('f-by').value='';
     document.getElementById('f-bm').value='';
@@ -372,18 +374,13 @@ window.submit=async function(){
 
     showToast(status==='대기'
       ?'신청 완료. 해당 회차는 정원 초과로 대기 처리됩니다.'
-      :`${date} / ${prog} / ${time} 신청이 완료되었습니다!`,'ok');
+      :date+' / '+prog+' / '+time+' 신청이 완료되었습니다!','ok');
   }catch(e){
     showToast('오류가 발생했습니다. 다시 시도해 주세요.','err');
+    console.error(e);
   }finally{
     btn.disabled=false;btn.textContent='신청하기';
   }
-}
-
-function showToast(msg,type){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.className='toast show '+type;
-  setTimeout(()=>{el.className='toast';},4000);
 }
 
 window.filt=function(type,val,btn){
@@ -401,7 +398,7 @@ window.goTab=function(name,btn){
 }
 
 initBirth();
-subscribeSlots();
+subscribeApps();
 </script>
 </body>
 </html>
