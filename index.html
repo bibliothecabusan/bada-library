@@ -174,18 +174,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 <!-- ✅ Firebase SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, increment, serverTimestamp, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, increment, serverTimestamp, getDoc, setDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // =============================================
 // ✅ 여기에 Firebase 설정값 붙여넣기
 // =============================================
 const firebaseConfig = {
-  apiKey: "AIzaSyCJwtXqltcejM9jA07IzEjhq9qSXGBr0g0",
-  authDomain: "bada-library.firebaseapp.com",
-  projectId: "bada-library",
-  storageBucket: "bada-library.firebasestorage.app",
-  messagingSenderId: "615532147657",
-  appId: "1:615532147657:web:e4e5458a9171a312adee18"
+apiKey: "AIzaSyCJwtXqltcejM9jA07IzEjhq9qSXGBr0g0",
+authDomain: "bada-library.firebaseapp.com",
+projectId: "bada-library",
+storageBucket: "bada-library.firebasestorage.app",
+messagingSenderId: "615532147657",
+appId: "1:615532147657:web:e4e5458a9171a312adee18"
 };
 // =============================================
 
@@ -332,14 +332,36 @@ window.submit=async function(){
 
   const [date,prog]=sv.split('|');
   const k=slotKey(date,prog,time);
-  const currentCount=(slots[k]||{count:0}).count;
-  const status=currentCount<CAP?'접수':'대기';
   const birth=`${by}.${bm}.${bd}`;
 
   const btn=document.getElementById('btn-submit');
-  btn.disabled=true;btn.textContent='신청 중...';
+  btn.disabled=true;btn.textContent='확인 중...';
 
   try{
+    // ✅ 중복 신청 체크 (이름 + 전화번호 + 생년월일 + 날짜 + 프로그램 + 회차)
+    const dupQ=query(
+      collection(db,'applications'),
+      where('name','==',name),
+      where('phone','==',phone),
+      where('birth','==',birth),
+      where('date','==',date),
+      where('prog','==',prog),
+      where('time','==',time)
+    );
+    const dupSnap=await getDocs(dupQ);
+    if(!dupSnap.empty){
+      showToast('이미 신청 완료되었습니다.','err');
+      btn.disabled=false;btn.textContent='신청하기';
+      return;
+    }
+
+    // ✅ 슬롯 현재 카운트 실시간 조회 후 접수/대기 판정
+    const slotSnap=await getDoc(doc(db,'slots',k));
+    const currentCount=slotSnap.exists()?slotSnap.data().count:0;
+    const status=currentCount<CAP?'접수':'대기';
+
+    btn.textContent='신청 중...';
+
     await addDoc(collection(db,'applications'),{
       name,birth,phone,date,prog,time,status,
       note:document.getElementById('f-note').value.trim(),
